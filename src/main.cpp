@@ -77,6 +77,10 @@ void ProgramState::SaveToFile(std::string filename) {
         << hdr << "\n"
         << gamma << "\n"
         << kernelEffects << "\n"
+        << dirLight.direction.x << "\n" << dirLight.direction.y << "\n" << dirLight.direction.z << "\n"
+        << dirLight.ambient.x << "\n" << dirLight.ambient.y << "\n" << dirLight.ambient.z << "\n"
+        << dirLight.diffuse.x << "\n" << dirLight.diffuse.y << "\n" << dirLight.diffuse.z << "\n"
+        << dirLight.specular.x << "\n" << dirLight.specular.y << "\n" << dirLight.specular.z << "\n"
         << camera.Position.x << '\n'
         << camera.Position.y << '\n'
         << camera.Position.z << '\n'
@@ -94,6 +98,10 @@ void ProgramState::LoadFromFile(std::string filename) {
            >> hdr
            >> gamma
            >> kernelEffects
+           >> dirLight.direction.x >> dirLight.direction.y >> dirLight.direction.z
+           >> dirLight.ambient.x >> dirLight.ambient.y >> dirLight.ambient.z
+           >> dirLight.diffuse.x >> dirLight.diffuse.y >> dirLight.diffuse.z
+           >> dirLight.specular.x >> dirLight.specular.y >> dirLight.specular.z
            >> camera.Position.x
            >> camera.Position.y
            >> camera.Position.z
@@ -107,7 +115,6 @@ ProgramState *programState;
 
 void DrawImGui(ProgramState *programState);
 void setNightLights(Shader& shader, float currentFrame);
-void setDayLights(Shader& shader, float currentFrame);
 void renderQuad();
 
 int main() {
@@ -160,8 +167,6 @@ int main() {
     ImGuiIO &io = ImGui::GetIO();
     (void) io;
 
-
-
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 330 core");
 
@@ -175,7 +180,6 @@ int main() {
     Shader objectShader("resources/shaders/model_lighting.vs", "resources/shaders/model_lighting.fs");
     Shader skyboxShader("resources/shaders/skybox_shader.vs", "resources/shaders/skybox_shader.fs");
     Shader discardShader("resources/shaders/discard_shader.vs", "resources/shaders/discard_shader.fs");
-    Shader instanceShader("resources/shaders/instance_shader.vs", "resources/shaders/instance_shader.fs");
     Shader screenShader("resources/shaders/framebuffers.vs", "resources/shaders/framebuffers.fs");
     Shader blurShader("resources/shaders/blur.vs", "resources/shaders/blur.fs");
 
@@ -354,7 +358,7 @@ int main() {
     blurShader.setInt("image", 0);
 
     // start values for directional light
-    programState->dirLight.direction = glm::vec3(-21.882572f, -35.517292f, -37.401550f);
+    programState->dirLight.direction = glm::vec3(-0.965f, 0.876f, -0.654f);
     programState->dirLight.ambient = glm::vec3(-0.3f, 0.2f, 0.3f);
     programState->dirLight.diffuse = glm::vec3(0.3f, 0.2f, 0.3f);
     programState->dirLight.specular = glm::vec3(0.2f, 0.1f, 0.3f);
@@ -461,7 +465,7 @@ int main() {
         tree.Draw(objectShader);
 
         model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(10.238466f, -7.468780f, -23.254124f));
+        model = glm::translate(model, glm::vec3(10.238466f, -9.35f, -23.254124f));
         model = glm::rotate(model, glm::radians(-64.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         model = glm::scale(model, glm::vec3(0.1f));
         objectShader.setMat4("model", model);
@@ -634,10 +638,10 @@ void DrawImGui(ProgramState *programState) {
         ImGui::RadioButton("None", &programState->kernelEffects, 3);
 
         ImGui::Text("Directional light adjustment");
-        ImGui::DragFloat3("Direction", (float*)&programState->dirLight.direction, 0.05, -10.0f, 10.0f, "%.4f", 0);
+        ImGui::DragFloat3("Direction", (float*)&programState->dirLight.direction, 0.05, -1.0f, 1.0f, "%.4f", 0);
         ImGui::DragFloat3("Ambient", (float*)&programState->dirLight.ambient, 0.02f, -1.0f, 1.0f, "%.4f", 0);
         ImGui::DragFloat3("Diffuse", (float*)&programState->dirLight.diffuse, 0.02f, -1.0f, 1.0f, "%.4f", 0);
-        ImGui::DragFloat3("Specular", (float*)&programState->dirLight.specular, 0.02f, -1.0f, .0f, "%.4f", 0);
+        ImGui::DragFloat3("Specular", (float*)&programState->dirLight.specular, 0.02f, -1.0f, 1.0f, "%.4f", 0);
 
         ImGui::End();
     }
@@ -663,6 +667,7 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
             programState->CameraMouseMovementUpdateEnabled = false;
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         } else {
+            programState->CameraMouseMovementUpdateEnabled = true;
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         }
     }
@@ -809,10 +814,10 @@ void setNightLights(Shader& shader, float currentFrame)
     shader.setFloat("material.shininess", 64.0f);
 
     std::vector<glm::vec3> positions = {
-            glm::vec3(-11.023065f, 8.9135011f * cos(currentFrame / 1.5f), 14.310511f * sin(currentFrame / 1.5f)),
-            glm::vec3(12.824927f, 8.9135011f * cos(currentFrame * 1.34f), -6.830830f * sin(currentFrame * 1.34f)),
-            glm::vec3(-9.759034f, 8.9135011f * cos(currentFrame / 1.5f), -30.399181f * sin(currentFrame / 1.5f)),
-            glm::vec3(-34.675980f, 8.9135011f * cos(currentFrame * 1.34f), -8.309442f * sin(currentFrame / 1.34f))
+            glm::vec3(-11.023065f, 8.9135011f * cos(currentFrame / 2.5f), 14.310511f * sin(currentFrame / 2.5f)),
+            glm::vec3(13.824927f * sin(currentFrame / 2.5f), 8.9135011f * cos(currentFrame / 2.5f), -9.308303f),
+            glm::vec3(-9.759034f, 8.9135011f * cos(currentFrame / 2.5f), -30.399181f * sin(currentFrame /2.5f)),
+            glm::vec3(-34.675980f * sin(currentFrame / 2.5f), 8.9135011f * cos(currentFrame / 2.5f), -9.308303f)
     };
 
     for (unsigned int i = 0; i < 4; ++i) {
