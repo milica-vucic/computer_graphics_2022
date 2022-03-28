@@ -2,7 +2,7 @@
 # Copyright 2004-2022 Aspose Pty Ltd.
 # File created: 01/23/2022 13:42:54
 
-mtllib material.lib
+mtllib moon.mtl
 
 #
 # object Moon

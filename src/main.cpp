@@ -189,7 +189,7 @@ int main() {
     temple.SetShaderTextureNamePrefix("material.");
     Model terrain("resources/objects/terrain/terrain.obj");
     terrain.SetShaderTextureNamePrefix("material.");
-    Model moon("resources/objects/moon/model.obj");
+    Model moon("resources/objects/moon/moon.obj");
     moon.SetShaderTextureNamePrefix("material.");
     Model totem("resources/objects/totem/totem.obj");
     totem.SetShaderTextureNamePrefix("material.");
@@ -388,6 +388,7 @@ int main() {
         // don't forget to enable shader before setting uniforms
         objectShader.use();
         objectShader.setBool("blinn", blinn);
+        objectShader.setVec3("viewPosition", programState->camera.Position);
 
         setNightLights(objectShader, currentFrame);
         if (spotlightEnabled) {
