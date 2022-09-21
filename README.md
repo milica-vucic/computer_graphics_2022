@@ -48,8 +48,8 @@ Za izradu je korišćen skelet projekta: `https://github.com/matf-racunarska-gra
 ---------------
 
 ## Galerija
-![](Gallery/scr1.png)
-![](Gallery/scr2.png)
-![](Gallery/scr3.png)
-![](Gallery/scr4.png)
-![](Gallery/scr5.png)
+![](Gallery/ph1.png)
+![](Gallery/ph2.png)
+![](Gallery/ph3.png)
+![](Gallery/ph4.png)
+![](Gallery/ph5.png)
